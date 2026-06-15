@@ -42,4 +42,4 @@ typedef struct packed s_header header;
 
 void *mkalloc(word, header*);
 void *alloc(int32);
-int main(int, char**);
+int main(int argc, char* argv[]);
