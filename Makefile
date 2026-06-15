@@ -15,4 +15,4 @@ heap.o: heap.asm
 	nasm -f elf64 $^
 
 clean :
-	rm -f *.o alloc
+	rm -f *.o *.h.gch  alloc
