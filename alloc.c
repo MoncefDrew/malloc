@@ -20,7 +20,7 @@ header *findblock_(header* hdr, word allocation ,word n){
         return hdr;
     }else{
         mem = $v hdr + hdr->w;
-        hdr = $h mem;
+        hdr_ = $h mem;
         n_ = n + hdr->w;
         return findblock_(hdr_, allocation ,n_);
     }
