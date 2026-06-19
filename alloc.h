@@ -11,7 +11,7 @@
 #define unused __attribute__((__unused__))
 #define Maxwords (1024*1024*1024/4)-1
 #define ErrNoMem 1
-
+#define ErrUnknown 2
 typedef unsigned char int8;
 typedef unsigned short int  int16;
 typedef unsigned int int32;
@@ -38,8 +38,13 @@ typedef struct packed s_header header;
 #define $h (header *)
 #define $i (int)
 
-#define reterr(x) errno = (x) ; return $v 0
+#define reterr(x) do { \
+    errno = (x) ; \
+    return $v 0; \
+}while(false)
 
+#define findblock(x) findblock_((header *) memspace, (x),0 )
+header *findblock_(header*,word,word);
 void *mkalloc(word, header*);
 void *alloc(int32);
 int main(int argc, char* argv[]);
