@@ -8,7 +8,6 @@ header *findblock_(header* hdr, word allocation ,word n){
     header *hdr_;
     word n_;
 
-
     if((n+allocation) > (Maxwords - 2)){
         reterr(ErrNoMem);
     }
@@ -19,7 +18,7 @@ header *findblock_(header* hdr, word allocation ,word n){
     if(ok){
         return hdr;
     }else{
-        mem = $v hdr + hdr->w;
+        mem = $v hdr + (hdr->w*4) + 4;
         hdr_ = $h mem;
         n_ = n + hdr->w;
         return findblock_(hdr_, allocation ,n_);
@@ -28,14 +27,12 @@ header *findblock_(header* hdr, word allocation ,word n){
 }
 
 void *mkalloc(word words, header *hdr){
-
     void *ret ,*bytesin;
     word wordsin;
 
     bytesin = ($v (($v hdr) - memspace));
 
     wordsin =  (((word)bytesin)/4)+1;
-
 
     if(words > (Maxwords-wordsin)){
         reterr(ErrNoMem);
@@ -48,48 +45,46 @@ void *mkalloc(word words, header *hdr){
 
 
 void *alloc(int32 bytes){
-
     void *mem;
     header *hdr;
     word words;
 
     words = (!(bytes % 4)) ? bytes/4 : (bytes/4)+1;
 
-    mem = $v  memspace;
-    hdr = $h  mem;
+    hdr = findblock(words);
+    if (!hdr) {
+        return $v 0;
+    }
 
-    (!(hdr->w)) ? ({
-        if (words > Maxwords){
-            reterr(ErrNoMem);
-        }
-        mem = mkalloc(words , hdr);
-        if (!mem)
-           return $v 0;
-        return mem;
-    })
-:
-    ({
-        (void)0;
-    });
+    if (words > Maxwords){
+        reterr(ErrNoMem);
+    }
+    mem = mkalloc(words , hdr);
+    if (!mem)
+       return $v 0;
+    return mem;
+}
 
-      return $v 0;
+void show_(header *hdr){
+    int32 n;
+    void *mem;
+    header *p;
+
+    for(n=1 ,p=hdr; p->w; mem=$v p + ((p->w+1)*4), p=mem ,n++)
+        printf("Alloc %d = %d %s words \n",
+               n, p->w, (p->alloced)? "alloced" : "free");
+    return;
 }
 
 int main(int argc,char *argv[]){
-    header *hdr;
-    int8 *p;
 
-    p = alloc(8);
-    printf("allocated :0x%x \n",$i p);
+    int8 *p ,*p2 ,*p3;
 
-    hdr = findblock(500);
-    if(!hdr) {
-        printf("Error %d\n ",errno);
-        return -1;
-    }
+    p = alloc(7);
+    p2 = alloc(2000);
+    p3 = alloc(20);
 
-    printf(" memspace : 0x%x \n",$i memspace);
-    printf(" Block : 0x%x \n",$i hdr);
+    show();
     return 0;
 
 }
